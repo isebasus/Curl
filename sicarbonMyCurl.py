@@ -6,12 +6,9 @@ import sys
 import re
 from urllib.request import urlopen
 
-# REGEX PATTERNS -----------------------------------------------------------------------------------------------------------------
-# Rest of the patterns used from https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
-host_port = "([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\:[0-9]{1,5})|([a-z]+\.[a-zA-Z0-9]+\.[a-z]+\:[0-9]{1,5})"
+# REGEX PATTERNS --------------------------------------------------------------------
 hostname_pattern = "([a-z]+\.[a-zA-Z0-9]+\.[a-z]+)"
 ip_pattern = "([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})"
-url_pattern = "(http(s)?://)?([\w-]+\.)+[\w-]+(/])?"
 
 
 
@@ -47,21 +44,20 @@ def parseUrl(args, parser):
         'listHeader': args.l
     }
 
-    http = re.findall("http[s]?", url)
-    if (len(http) == 0):
+    # Check if user input for http is correct
+    http = url[0:4]
+    if (http != "http"):
         parser.print_help()
         sys.exit(bcolors.FAIL + "Exception: http needs to be specified." + bcolors.ENDC)
-    if (http[0] == "https"):
+    colon_slash = url[4:7]
+    if (colon_slash != "://"):
         parser.print_help()
         sys.exit(bcolors.FAIL + "Exception: HTTPS is not supported." + bcolors.ENDC)
-    hostnamePort = re.findall(host_port, url)
-    if (len(hostnamePort) == 0):
-        urlObject["port"] = 80
-    else:
-        parsed = hostnamePort[0].split(":")
-        urlObject["port"] = parsed[1]
+    
+    # Check for hostname or IP
     hostname = re.findall(hostname_pattern, url)
     ip = re.findall(ip_pattern, url)
+    query = ""
     if (len(hostname) == 0):
         if (len(ip) == 0):
             parser.print_help()
@@ -70,21 +66,37 @@ def parseUrl(args, parser):
             parser.print_help()
             sys.exit(bcolors.FAIL + "Exception: IP needs hostname." + bcolors.ENDC)
         urlObject["hostname"] = args.hostname
-        urlObject["ip"] = ip
+        urlObject["ip"] = ip[0]
+        query = url.replace("http://" + ip[0], "", 1)
     else:
         urlObject["hostname"] = hostname[0]
-    url_match = re.findall(url_pattern, url)
-    print(url_match[0])
-    print(urlObject["hostname"])
-    print(urlObject["port"])
-    print(urlObject["url"])
-    #query = url.replace(url_match[0], '')
-    #print(query)
+        query = url.replace("http://" + hostname[0], "", 1)
     
-
-
-    
-    print(args.url)
+    # Check for port
+    if (len(query) != 0):
+        if (query[0] == ":"):
+            count = 0
+            for c in query:
+                if count == 0:
+                    count+=1
+                    continue
+                if not c.isdigit():
+                    break
+                count+=1
+            if count == 0:
+                parser.print_help()
+                sys.exit(bcolors.FAIL + "Exception: No port was specified." + bcolors.ENDC)
+            urlObject["port"] = query[1:count]
+            urlObject["query"] = query[count:]
+        else:
+            urlObject["port"] = "80"
+            urlObject["query"] = query
+            
+    # Create new URL
+    if (urlObject["ip"] == None):
+        urlObject["url"] = "http://" + urlObject["hostname"] + urlObject["query"]
+    else:
+        urlObject["url"] = "http://" + urlObject["ip"] + urlObject["query"]
     return urlObject
 
 # main
