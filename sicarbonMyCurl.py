@@ -10,8 +10,6 @@ from urllib.request import urlopen
 hostname_pattern = "([a-z]+\.[a-zA-Z0-9]+\.[a-z]+)"
 ip_pattern = "([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})"
 
-
-
 # Command Line colors
 # 
 # Resource:
@@ -27,6 +25,31 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
+class Network:
+    def __init__(self, hostname, port):
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server = hostname
+        self.port = int(port)
+        self.addr = (self.server, self.port)
+        self.conn = self.connect()
+    def connect(self):
+        try:
+            self.client.bind(self.addr)
+        except Exception as e:
+            self.client.close()
+            sys.exit(bcolors.FAIL + "ERROR: " + str(e) + bcolors.ENDC)
+        self.client.listen()
+        try:
+            self.client.connect()
+        except Exception as e:
+            self.client.close()
+            sys.exit(bcolors.FAIL + "ERROR: something's wrong with " + self.addr + ":" + str(self.port) + "Exception is " + str(e) + bcolors.ENDC)
+        conn, addr = self.client.accept()
+        return (conn, addr)
+    def getData(self, conn, addr):
+        print("hello")
+
 
 # parseUrl
 # 
@@ -91,7 +114,7 @@ def parseUrl(args, parser):
         else:
             urlObject["port"] = "80"
             urlObject["query"] = query
-            
+
     # Create new URL
     if (urlObject["ip"] == None):
         urlObject["url"] = "http://" + urlObject["hostname"] + urlObject["query"]
@@ -123,6 +146,9 @@ def main():
         quit()
     args = parser.parse_args()
     urlObject = parseUrl(args, parser)
+    print(urlObject)
+    network = Network(urlObject["hostname"], urlObject["port"])
+    
 
 if __name__ == "__main__":
     main()
