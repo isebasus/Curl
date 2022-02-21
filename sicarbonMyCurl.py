@@ -37,7 +37,7 @@ class Socket:
         self.hostname = hostname
         self.port = int(port)
         self.addr = (self.ip, self.port)
-        self.conn = self.connect()
+        self.connect()
     def connect(self):
         # Get and validate ip and port
         try:
@@ -53,11 +53,12 @@ class Socket:
         
         # Connect
         try:
-            self.client.connect(self.addr)
+            self.client.connect(('8.8.8.8', 80))
+            self.client.recv(1)
+            print("connection sucessful")
         except Exception as e:
             self.client.close()
             sys.exit(bcolors.FAIL + "ERROR: something's wrong with " + str(self.addr) + " Exception is " + str(e) + bcolors.ENDC)
-        return "bruh"
     def getData(self, conn, addr):
         print("hello")
     def close():
