@@ -26,20 +26,37 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-class Network:
-    def __init__(self, hostname, port):
+class Socket:
+    def __init__(self, hostname, ip, port):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = hostname
+        self.ip = ip
+        self.hostname = hostname
         self.port = int(port)
-        self.addr = (self.server, self.port)
+        self.addr = (self.ip, self.port)
         self.conn = self.connect()
     def connect(self):
+        # Get and validate ip and port
         try:
+            ip = socket.gethostbyname(self.hostname)
+            if (self.ip != '' and self.ip != ip):
+                self.client.close()
+                sys.exit(bcolors.FAIL + "ERROR: Invalid hostname or ip was given." + bcolors.ENDC)
+            self.ip = ip
+            self.addr = (ip, self.port)
+        except Exception as e:
+            self.client.close()
+            sys.exit(bcolors.FAIL + "ERROR: " + str(e) + bcolors.ENDC)
+        
+        # Bind ip and port
+        try:
+            print(self.addr)
             self.client.bind(self.addr)
         except Exception as e:
             self.client.close()
             sys.exit(bcolors.FAIL + "ERROR: " + str(e) + bcolors.ENDC)
         self.client.listen()
+
+        # Connect
         try:
             self.client.connect()
         except Exception as e:
@@ -147,7 +164,10 @@ def main():
     args = parser.parse_args()
     urlObject = parseUrl(args, parser)
     print(urlObject)
-    network = Network(urlObject["hostname"], urlObject["port"])
+    ip = ''
+    if (urlObject["ip"] != None):
+        ip = urlObject["ip"]
+    conn, addr = Socket(urlObject["hostname"], ip, urlObject["port"])
     
 
 if __name__ == "__main__":
