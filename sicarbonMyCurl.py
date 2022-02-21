@@ -6,6 +6,9 @@ import sys
 import re
 from urllib.request import urlopen
 
+port = 5055
+localhost = "0.0.0.0"
+
 # REGEX PATTERNS --------------------------------------------------------------------
 hostname_pattern = "([a-z]+\.[a-zA-Z0-9]+\.[a-z]+)"
 ip_pattern = "([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})"
@@ -29,6 +32,7 @@ class bcolors:
 class Socket:
     def __init__(self, hostname, ip, port):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        socket.setdefaulttimeout(5)
         self.ip = ip
         self.hostname = hostname
         self.port = int(port)
@@ -38,34 +42,26 @@ class Socket:
         # Get and validate ip and port
         try:
             ip = socket.gethostbyname(self.hostname)
-            if (self.ip != '' and self.ip != ip):
+            if (self.ip != "" and self.ip != ip):
                 self.client.close()
                 sys.exit(bcolors.FAIL + "ERROR: Invalid hostname or ip was given." + bcolors.ENDC)
-            self.ip = ip
-            self.addr = (ip, self.port)
+            self.ip = str(ip)
+            self.addr = (str(ip), self.port)
         except Exception as e:
             self.client.close()
             sys.exit(bcolors.FAIL + "ERROR: " + str(e) + bcolors.ENDC)
         
-        # Bind ip and port
-        try:
-            print(self.addr)
-            self.client.bind(self.addr)
-        except Exception as e:
-            self.client.close()
-            sys.exit(bcolors.FAIL + "ERROR: " + str(e) + bcolors.ENDC)
-        self.client.listen()
-
         # Connect
         try:
-            self.client.connect()
+            self.client.connect(self.addr)
         except Exception as e:
             self.client.close()
-            sys.exit(bcolors.FAIL + "ERROR: something's wrong with " + self.addr + ":" + str(self.port) + "Exception is " + str(e) + bcolors.ENDC)
-        conn, addr = self.client.accept()
-        return (conn, addr)
+            sys.exit(bcolors.FAIL + "ERROR: something's wrong with " + str(self.addr) + " Exception is " + str(e) + bcolors.ENDC)
+        return "bruh"
     def getData(self, conn, addr):
         print("hello")
+    def close():
+        self.client.close()
 
 
 # parseUrl
@@ -164,11 +160,11 @@ def main():
     args = parser.parse_args()
     urlObject = parseUrl(args, parser)
     print(urlObject)
-    ip = ''
+    ip = ""
     if (urlObject["ip"] != None):
         ip = urlObject["ip"]
-    conn, addr = Socket(urlObject["hostname"], ip, urlObject["port"])
-    
+    socket = Socket(urlObject["hostname"], ip, urlObject["port"])
+    socket.close()
 
 if __name__ == "__main__":
     main()
