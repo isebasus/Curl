@@ -1,15 +1,19 @@
 import argparse
+from doctest import REPORT_CDIFF
 import textwrap
 import socket
-import string
 import sys
 import re
 from urllib.request import urlopen
 
+# Definitions -----------------------------------------------------------------------
+HTTP_DELIMITER = b'\r\n\r\n'
+CONTENT_LENGTH = b'Content-Length:'
+
 # REGEX PATTERNS --------------------------------------------------------------------
-hostname_pattern = "([a-z]+\.[a-zA-Z0-9]+\.[a-z]+)"
-domain_pattern = "([a-zA-Z0-9]+\.[a-z]+)"
-ip_pattern = "([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})"
+HOSTNAME_PATTERN = "([a-z]+\.[a-zA-Z0-9]+\.[a-z]+)"
+DOMAIN_PATTERN = "([a-zA-Z0-9]+\.[a-z]+)"
+IP_PATTERN = "([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})"
 
 # Command Line colors ---------------------------------------------------------------
 # 
@@ -35,39 +39,56 @@ def err3(addr, e):
     return bcolors.FAIL + "ERROR: something's wrong with " + str(addr) + " Exception is " + str(e) + bcolors.ENDC
 
 class Socket:
-    def __init__(self, hostname, ip, port):
+    def __init__(self, hostname, ip, port, query):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client.settimeout(5)
         self.ip = ip
-        self.hostname = hostname
         self.port = int(port)
+        self.query = query
+        self.hostname = hostname
         self.addr = (hostname, int(port))
+        self.useIp = False
+        self.client.settimeout(10)
         self.connect()
     def connect(self):
-        # Get and validate ip and port
         try:
             ip = socket.gethostbyname(self.hostname)
             if (self.ip != "" and self.ip != ip):
                 self.client.close()
                 sys.exit(ERR1)
+            if (self.ip != ""):
+                self.useIp == True
             self.ip = str(ip)
-            self.addr = (self.hostname, self.port)
+            self.addr = (self.hostname, self.port) if self.useIp == False else (self.ip, self.port)
         except Exception as e:
             self.client.close()
             sys.exit(err2(e))
         try:
-            self.client.connect((self.hostname, self.port))
-            print("connection sucessful")
+            self.client.connect(self.addr)
+        except Exception as e:
+            self.client.close()
+            sys.exit(err3(self.addr, e))
+    def sendRequest(self):
+        try:
+            if (self.useIp == False):
+                get = "GET " + self.query + " HTTP/1.1\r\nHost: "+ self.hostname +"\r\n\r\n"
+                b = get.encode('utf-8')
+                self.client.sendall(b)
+            else:
+                get = "GET " + self.query + " HTTP/1.1\r\nHost: "+ self.hostname
+                b = get.encode('utf-8')
+                self.client.sendall(b)
         except Exception as e:
             self.client.close()
             sys.exit(err3(self.addr, e))
     def getData(self):
-        try:
-            self.client.sendall(b"HEAD / HTTP/1.1\r\nHost: "+ str.encode(self.hostname) +"\r\nAccept: text/html\r\n\r\n")
-            print(str(self.client.recv(1024), 'utf-8'))
-        except Exception as e:
-            self.client.close()
-            sys.exit(err3(self.addr, e))
+        response = b""
+        while True:
+            chunk = self.client.recv(1024)
+            if (len(chunk) == 0):
+                break
+            print(chunk)
+            response = response + chunk
+        print(response)
     def close(self):
         self.client.close()
 
@@ -87,7 +108,6 @@ def parseUrl(args, parser):
         'query': None,
         'listHeader': args.l
     }
-
     # Check if user input for http is correct
     http = url[0:4]
     if (http != "http"):
@@ -99,9 +119,9 @@ def parseUrl(args, parser):
         sys.exit(bcolors.FAIL + "Exception: HTTPS is not supported." + bcolors.ENDC)
     
     # Check for hostname or IP
-    hostname = re.findall(hostname_pattern, url)
-    domain = re.findall(domain_pattern, url)
-    ip = re.findall(ip_pattern, url)
+    hostname = re.findall(HOSTNAME_PATTERN, url)
+    domain = re.findall(DOMAIN_PATTERN, url)
+    ip = re.findall(IP_PATTERN, url)
     query = ""
     if (len(hostname) == 0 and len(domain) == 0):
         if (len(ip) == 0):
@@ -173,11 +193,14 @@ def main():
         quit()
     args = parser.parse_args()
     urlObject = parseUrl(args, parser)
-    print(urlObject)
     ip = ""
     if (urlObject["ip"] != None):
         ip = urlObject["ip"]
-    socket = Socket(urlObject["hostname"], ip, urlObject["port"])
+    query = "/"
+    if (urlObject["query"] != ""):
+        query = urlObject["query"]
+    socket = Socket(urlObject["hostname"], ip, urlObject["port"], query)
+    socket.sendRequest()
     socket.getData()
     socket.close()
 
