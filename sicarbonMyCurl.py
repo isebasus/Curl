@@ -6,14 +6,12 @@ import sys
 import re
 from urllib.request import urlopen
 
-port = 5055
-localhost = "0.0.0.0"
-
 # REGEX PATTERNS --------------------------------------------------------------------
 hostname_pattern = "([a-z]+\.[a-zA-Z0-9]+\.[a-z]+)"
+domain_pattern = "([a-zA-Z0-9]+\.[a-z]+)"
 ip_pattern = "([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})"
 
-# Command Line colors
+# Command Line colors ---------------------------------------------------------------
 # 
 # Resource:
 # https://stackoverflow.com/questions/287871/how-to-print-colored-text-to-the-terminal
@@ -29,14 +27,21 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+# ERROR MESSAGES --------------------------------------------------------------------
+ERR1 = bcolors.FAIL + "ERROR: Invalid hostname or ip was given." + bcolors.ENDC
+def err2(e): 
+    return bcolors.FAIL + "ERROR: " + str(e) + bcolors.ENDC
+def err3(addr, e):
+    return bcolors.FAIL + "ERROR: something's wrong with " + str(addr) + " Exception is " + str(e) + bcolors.ENDC
+
 class Socket:
     def __init__(self, hostname, ip, port):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        socket.setdefaulttimeout(5)
+        self.client.settimeout(5)
         self.ip = ip
         self.hostname = hostname
         self.port = int(port)
-        self.addr = (self.ip, self.port)
+        self.addr = (hostname, int(port))
         self.connect()
     def connect(self):
         # Get and validate ip and port
@@ -44,24 +49,26 @@ class Socket:
             ip = socket.gethostbyname(self.hostname)
             if (self.ip != "" and self.ip != ip):
                 self.client.close()
-                sys.exit(bcolors.FAIL + "ERROR: Invalid hostname or ip was given." + bcolors.ENDC)
+                sys.exit(ERR1)
             self.ip = str(ip)
-            self.addr = (str(ip), self.port)
+            self.addr = (self.hostname, self.port)
         except Exception as e:
             self.client.close()
-            sys.exit(bcolors.FAIL + "ERROR: " + str(e) + bcolors.ENDC)
-        
-        # Connect
+            sys.exit(err2(e))
         try:
-            self.client.connect(('8.8.8.8', 80))
-            self.client.recv(1)
+            self.client.connect((self.hostname, self.port))
             print("connection sucessful")
         except Exception as e:
             self.client.close()
-            sys.exit(bcolors.FAIL + "ERROR: something's wrong with " + str(self.addr) + " Exception is " + str(e) + bcolors.ENDC)
-    def getData(self, conn, addr):
-        print("hello")
-    def close():
+            sys.exit(err3(self.addr, e))
+    def getData(self):
+        try:
+            self.client.sendall(b"HEAD / HTTP/1.1\r\nHost: "+ str.encode(self.hostname) +"\r\nAccept: text/html\r\n\r\n")
+            print(str(self.client.recv(1024), 'utf-8'))
+        except Exception as e:
+            self.client.close()
+            sys.exit(err3(self.addr, e))
+    def close(self):
         self.client.close()
 
 
@@ -93,9 +100,10 @@ def parseUrl(args, parser):
     
     # Check for hostname or IP
     hostname = re.findall(hostname_pattern, url)
+    domain = re.findall(domain_pattern, url)
     ip = re.findall(ip_pattern, url)
     query = ""
-    if (len(hostname) == 0):
+    if (len(hostname) == 0 and len(domain) == 0):
         if (len(ip) == 0):
             parser.print_help()
             sys.exit(bcolors.FAIL + "Exception: No host name or IP was specified." + bcolors.ENDC)
@@ -106,8 +114,13 @@ def parseUrl(args, parser):
         urlObject["ip"] = ip[0]
         query = url.replace("http://" + ip[0], "", 1)
     else:
-        urlObject["hostname"] = hostname[0]
-        query = url.replace("http://" + hostname[0], "", 1)
+        name = ""
+        if (len(hostname) == 0):
+            name = domain[0]
+        else:
+            name = hostname[0]
+        urlObject["hostname"] = name
+        query = url.replace("http://" + name, "", 1)
     
     # Check for port
     if (len(query) != 0):
@@ -165,6 +178,7 @@ def main():
     if (urlObject["ip"] != None):
         ip = urlObject["ip"]
     socket = Socket(urlObject["hostname"], ip, urlObject["port"])
+    socket.getData()
     socket.close()
 
 if __name__ == "__main__":
