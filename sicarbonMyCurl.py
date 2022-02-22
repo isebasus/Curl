@@ -25,21 +25,17 @@ IP_PATTERN = "([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})"
 # https://stackoverflow.com/questions/287871/how-to-print-colored-text-to-the-terminal
 #
 class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
     OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
 
 # ERROR MESSAGES --------------------------------------------------------------------
 ERR1 = bcolors.FAIL + "ERROR: Invalid hostname or ip was given." + bcolors.ENDC
 ERR4 = bcolors.FAIL + "ERROR: Chunk encoding is not supported" + bcolors.ENDC
+
 def err2(e): 
     return bcolors.FAIL + "ERROR: " + str(e) + bcolors.ENDC
+
 def err3(addr, e):
     return bcolors.FAIL + "ERROR: something's wrong with " + str(addr) + " Exception is " + str(e) + bcolors.ENDC
 
@@ -68,9 +64,15 @@ def parseUrl(args, parser):
     hostname = re.findall(HOSTNAME_PATTERN, url)
     domain = re.findall(DOMAIN_PATTERN, url)
     ip = re.findall(IP_PATTERN, url)
+    hostOrDomain = url[7:]
     query = ""
 
-    if (len(hostname) == 0 and len(domain) == 0):
+    if (not len(domain) == 0 and not hostOrDomain.startswith(domain[0])) or len(domain) == 0:
+        domain = None
+    if (not len(hostname) == 0 and not hostOrDomain.startswith(hostname[0])) or len(hostname) == 0:
+        hostname = None
+
+    if (hostname == None and domain == None):
         if (len(ip) == 0):
             parser.print_help()
             sys.exit(bcolors.FAIL + "Exception: No host name or IP was specified." + bcolors.ENDC)
@@ -124,7 +126,6 @@ class Http:
         self.content_length = 0
         self.http_status = ""
         self.useIp = False
-        self.body = bytes()
         self.header = bytes()
         self.addr = (hostname, int(port))
         self.client.settimeout(TIMEOUT)
@@ -137,7 +138,7 @@ class Http:
                 self.client.close()
                 sys.exit(ERR1)
             if (self.ip != ""):
-                self.useIp == True
+                self.useIp = True
             self.ip = str(ip)
             self.addr = (self.hostname, self.port) if self.useIp == False else (self.ip, self.port)
         except Exception as e:
@@ -151,14 +152,9 @@ class Http:
 
     def send_request(self):
         try:
-            if (self.useIp == False):
-                get = "GET " + self.query + " HTTP/1.1\r\nHost: "+ self.hostname +"\r\n\r\n"
-                b = get.encode('utf-8')
-                self.client.sendall(b)
-            else:
-                get = "GET " + self.query + " HTTP/1.1\r\nHost: "+ self.hostname
-                b = get.encode('utf-8')
-                self.client.sendall(b)
+            get = "GET " + self.query + " HTTP/1.1\r\nHost: "+ self.hostname +"\r\n\r\n"
+            b = get.encode('utf-8')
+            self.client.sendall(b)
         except Exception as e:
             self.client.close()
             sys.exit(err3(self.addr, e))
@@ -169,7 +165,7 @@ class Http:
             while True:
                 chunk = self.client.recv(BUFFER_LENGTH)
                 if (chunk == None or HTTP_DELIMITER in self.header):
-                    break;
+                    break
                 self.header += chunk
         except Exception as e:
             self.client.close()
@@ -180,10 +176,9 @@ class Http:
         i = 0
         for param in self.header.split(b'\r\n'):
             if i == 0 and SUCCESS_DELIMITER not in param:
-                # TODO log failure here
                 self.http_status = param.decode("utf-8")
                 self.status(False)
-                self.log()
+                self.log("Unsuccessful")
                 self.client.close()
                 quit()
             elif i == 0:
@@ -192,23 +187,38 @@ class Http:
             if (CONTENT_LENGTH in param):
                 self.content_length = int(param[len(CONTENT_LENGTH):])
             if (CHUNK_DELIMITER in param):
-                # TODO log failure here
-                self.log()
+                self.log("Unsuccessful")
                 self.client.close()
                 quit(ERR4)
             i+=1
     
     def content(self):
         try: 
-            self.body = self.client.recv(self.content_length)
+            index = 0
+            f = open("HTTPoutput.html", "w")
+            while True:
+                if (index == self.content_length):
+                    break
+                tmp = self.client.recv(1024)
+                f.write(tmp.decode("utf-8"))
+                index += len(tmp)
+            f.close()
         except Exception as e:
             self.client.close()
             sys.exit(err2(e))
-        return self.body.decode("utf-8")
 
-    def log(self):
-        print("hello")
-    
+    def log(self, status):
+        f = open("Log.csv", "a")
+        src_ip, src_port = self.client.getsockname()
+        status_code = [int(word) for word in self.http_status.split() if word.isdigit()][0]
+        info = (
+            status + ", " + str(status_code) + ", " + self.url + ", " + self.hostname + ", " + 
+            src_ip + ", " + self.ip + ", " + str(src_port) + ", " + str(self.port) + ", " + 
+            self.http_status
+        )
+        f.write(info + "\n\n")
+        f.close()
+
     def status(self, is_success):
         if (is_success):
             print(bcolors.OKGREEN + "Success " + self.url + " " + self.http_status + bcolors.ENDC)
@@ -245,7 +255,7 @@ def main():
     port = "80"
     if (urlObject["ip"] != None):
         ip = urlObject["ip"]
-    if (urlObject["query"] != ""):
+    if (urlObject["query"] != "" and urlObject["query"] != None):
         query = urlObject["query"]
     if (urlObject["port"] != None):
         port = urlObject["port"]
@@ -253,13 +263,10 @@ def main():
     # Create HTTP object
     http = Http(urlObject["hostname"], ip, port, query, urlObject["url"])
     http.send_request()
-    content = http.content()
-    f = open("HTTPoutput.html", "w")
-    f.write(content)
-    f.close()
+    http.content()
 
     # On success, log and close
-    http.log()
+    http.log("Success")
     http.close()
 
 if __name__ == "__main__":

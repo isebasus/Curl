@@ -1,0 +1,38 @@
+Success, 200, http://www.testingmcafeesites.com/, www.testingmcafeesites.com, 161.69.49.22, 161.69.49.22, 80, 80, HTTP/1.1 200 OK
+
+Success, 200, http://www.testingmcafeesites.com/, www.testingmcafeesites.com, 161.69.49.22, 161.69.49.22, 80, 80, HTTP/1.1 200 OK
+
+Success, 200, http://www.testingmcafeesites.com/, www.testingmcafeesites.com, Sebastians-MacBook-Pro-4.local, 161.69.49.22, 80, 80, HTTP/1.1 200 OK
+
+Success, 200, http://www.testingmcafeesites.com/, www.testingmcafeesites.com, 192.168.0.104, 161.69.49.22, 54355, 80, HTTP/1.1 200 OK
+
+Unsuccessful, 200, http://www.google.com/, www.google.com, 192.168.0.104, 142.250.189.228, 54372, 80, HTTP/1.1 200 OK
+
+Unsuccessful, 404, http://93.184.216.34:80/foo.html, www.example.com, 192.168.0.104, 93.184.216.34, 54860, 80, HTTP/1.1 404 Not Found
+
+Unsuccessful, 404, http://93.184.216.34:80/foo.html, www.example.com, 192.168.0.104, 93.184.216.34, 54925, 80, HTTP/1.1 404 Not Found
+
+Success, 200, http://www.testingmcafeesites.com/, www.testingmcafeesites.com, 192.168.0.104, 161.69.29.75, 54942, 80, HTTP/1.1 200 OK
+
+Unsuccessful, 404, http://93.184.216.34:80/foo.html, www.example.com, 192.168.0.104, 93.184.216.34, 54947, 80, HTTP/1.1 404 Not Found
+
+Unsuccessful, 404, http://93.184.216.34:80/foo.html, www.example.com, 192.168.0.104, 93.184.216.34, 54986, 80, HTTP/1.1 404 Not Found
+
+Unsuccessful, 404, http://93.184.216.34:80/foo.html, www.example.com, 192.168.0.104, 93.184.216.34, 55009, 80, HTTP/1.1 404 Not Found
+
+Unsuccessful, 404, http://93.184.216.34:80/foo.html, www.example.com, 192.168.0.104, 93.184.216.34, 55048, 80, HTTP/1.1 404 Not Found
+
+Unsuccessful, 404, http://93.184.216.34:80/foo.html, www.example.com, 192.168.0.104, 93.184.216.34, 55072, 80, HTTP/1.1 404 Not Found
+
+Unsuccessful, 404, http://93.184.216.34:80/foo.html, www.example.com, 192.168.0.104, 93.184.216.34, 55088, 80, HTTP/1.1 404 Not Found
+
+Unsuccessful, 404, http://93.184.216.34:80/foo.html, www.example.com, 192.168.0.104, 93.184.216.34, 55094, 80, HTTP/1.1 404 Not Found
+
+Success, 200, http://149.248.9.165, www.isebas.us, 192.168.0.104, 149.248.9.165, 56226, 80, HTTP/1.1 200 OK
+
+Success, 200, http://149.248.9.165, www.isebas.us, 192.168.0.104, 149.248.9.165, 56238, 80, HTTP/1.1 200 OK
+
+Success, 200, http://149.248.9.165, www.isebas.us, 192.168.0.104, 149.248.9.165, 56247, 80, HTTP/1.1 200 OK
+
+Success, 200, http://149.248.9.165, www.isebas.us, 192.168.0.104, 149.248.9.165, 56281, 80, HTTP/1.1 200 OK
+
