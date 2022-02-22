@@ -1,6 +1,5 @@
 import argparse
 from doctest import REPORT_CDIFF
-from email.policy import HTTP
 import textwrap
 import socket
 import sys
@@ -8,7 +7,7 @@ import re
 from urllib.request import urlopen
 
 # Definitions -----------------------------------------------------------------------
-HTTP_DELIMITER = b'\r\n\r\n'
+HTTP_DELIMITER = b'\r\n\r'
 CONTENT_LENGTH = b'Content-Length:'
 SUCCESS_DELIMITER = b'HTTP/1.1 200 OK'
 CHUNK_DELIMITER = b'Transfer-Encoding: chunked'
@@ -45,126 +44,6 @@ def err3(addr, e):
     return bcolors.FAIL + "ERROR: something's wrong with " + str(addr) + " Exception is " + str(e) + bcolors.ENDC
 
 
-class Socket:
-    """Socket class to perform HTTP requests to hosts"""
-
-    def __init__(self, hostname, ip, port, query, url):
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.ip = ip
-        self.url = url
-        self.port = int(port)
-        self.query = query
-        self.hostname = hostname
-        self.content_length = 0
-        self.http_status = ""
-        self.useIp = False
-        self.body = bytes()
-        self.header = bytes()
-        self.addr = (hostname, int(port))
-        self.client.settimeout(TIMEOUT)
-        self.connect()
-
-    def connect(self):
-        """Socket class to perform HTTP requests to hosts"""
-        try:
-            ip = socket.gethostbyname(self.hostname)
-            if (self.ip != "" and self.ip != ip):
-                self.client.close()
-                sys.exit(ERR1)
-            if (self.ip != ""):
-                self.useIp == True
-            self.ip = str(ip)
-            self.addr = (self.hostname, self.port) if self.useIp == False else (self.ip, self.port)
-        except Exception as e:
-            self.client.close()
-            sys.exit(err2(e))
-        try:
-            self.client.connect(self.addr)
-        except Exception as e:
-            self.client.close()
-            sys.exit(err3(self.addr, e))
-
-    def sendRequest(self):
-        """Socket class to perform HTTP requests to hosts"""
-        try:
-            if (self.useIp == False):
-                get = "GET " + self.query + " HTTP/1.1\r\nHost: "+ self.hostname +"\r\n\r\n"
-                b = get.encode('utf-8')
-                self.client.sendall(b)
-            else:
-                get = "GET " + self.query + " HTTP/1.1\r\nHost: "+ self.hostname
-                b = get.encode('utf-8')
-                self.client.sendall(b)
-        except Exception as e:
-            self.client.close()
-            sys.exit(err3(self.addr, e))
-        self.getHeader()
-
-    def getHeader(self):
-        """Socket class to perform HTTP requests to hosts"""
-        try: 
-            while True:
-                chunk = self.client.recv(BUFFER_LENGTH)
-                if (chunk == None or HTTP_DELIMITER in self.header):
-                    break;
-                self.header += chunk
-        except Exception as e:
-            self.client.close()
-            sys.exit(err2(e))
-        self.readHeader()
-
-    def readHeader(self):
-        """Socket class to perform HTTP requests to hosts"""
-        i = 0
-        for param in self.header.split(b'\r\n'):
-            if i == 0 and SUCCESS_DELIMITER not in param:
-                # TODO log failure here
-                self.http_status = param.decode("utf-8")
-                self.status(False)
-                self.client.close()
-                quit()
-            elif i == 0:
-                self.http_status = param.decode("utf-8")
-                self.status(True)
-            if (CONTENT_LENGTH in param):
-                self.content_length = int(param[len(CONTENT_LENGTH):])
-            if (CHUNK_DELIMITER in param):
-                # TODO log failure here
-                self.client.close()
-                quit(ERR4)
-            i+=1
-    
-    def content(self):
-        """Socket class to perform HTTP requests to hosts"""
-        try: 
-            self.body = self.client.recv(self.content_length)
-        except Exception as e:
-            self.client.close()
-            sys.exit(err2(e))
-        return self.body.decode("utf-8")
-
-    def log(self):
-        """Socket class to perform HTTP requests to hosts"""
-        print("hello")
-    
-    def status(self, is_success):
-        """Socket class to perform HTTP requests to hosts"""
-        if (is_success):
-            print(bcolors.OKGREEN + "Success " + self.url + " " + self.http_status + bcolors.ENDC)
-        else:
-            print(bcolors.FAIL + "Unsuccessful " + self.url + " " + self.http_status + bcolors.ENDC)
-
-    def close(self):
-        """Socket class to perform HTTP requests to hosts"""
-        self.client.close()
-
-"""
-# parseUrl
-# 
-# Description: used to parse URL for valid
-# input from the user
-#
-"""
 def parseUrl(args, parser):
     url = args.url
     urlObject = {
@@ -190,6 +69,7 @@ def parseUrl(args, parser):
     domain = re.findall(DOMAIN_PATTERN, url)
     ip = re.findall(IP_PATTERN, url)
     query = ""
+
     if (len(hostname) == 0 and len(domain) == 0):
         if (len(ip) == 0):
             parser.print_help()
@@ -230,12 +110,116 @@ def parseUrl(args, parser):
             urlObject["query"] = query
     return urlObject
 
-# main
-# 
-# Description: used to parse user
-# arguments from command line
-#
+
+class Http:
+    """Socket class to perform HTTP requests to hosts"""
+
+    def __init__(self, hostname, ip, port, query, url):
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.ip = ip
+        self.url = url
+        self.port = int(port)
+        self.query = query
+        self.hostname = hostname
+        self.content_length = 0
+        self.http_status = ""
+        self.useIp = False
+        self.body = bytes()
+        self.header = bytes()
+        self.addr = (hostname, int(port))
+        self.client.settimeout(TIMEOUT)
+        self.connect()
+
+    def connect(self):
+        try:
+            ip = socket.gethostbyname(self.hostname)
+            if (self.ip != "" and self.ip != ip):
+                self.client.close()
+                sys.exit(ERR1)
+            if (self.ip != ""):
+                self.useIp == True
+            self.ip = str(ip)
+            self.addr = (self.hostname, self.port) if self.useIp == False else (self.ip, self.port)
+        except Exception as e:
+            self.client.close()
+            sys.exit(err2(e))
+        try:
+            self.client.connect(self.addr)
+        except Exception as e:
+            self.client.close()
+            sys.exit(err3(self.addr, e))
+
+    def send_request(self):
+        try:
+            if (self.useIp == False):
+                get = "GET " + self.query + " HTTP/1.1\r\nHost: "+ self.hostname +"\r\n\r\n"
+                b = get.encode('utf-8')
+                self.client.sendall(b)
+            else:
+                get = "GET " + self.query + " HTTP/1.1\r\nHost: "+ self.hostname
+                b = get.encode('utf-8')
+                self.client.sendall(b)
+        except Exception as e:
+            self.client.close()
+            sys.exit(err3(self.addr, e))
+        self.get_header()
+
+    def get_header(self):
+        try: 
+            while True:
+                chunk = self.client.recv(BUFFER_LENGTH)
+                if (chunk == None or HTTP_DELIMITER in self.header):
+                    break;
+                self.header += chunk
+        except Exception as e:
+            self.client.close()
+            sys.exit(err2(e))
+        self.read_header()
+
+    def read_header(self):
+        i = 0
+        for param in self.header.split(b'\r\n'):
+            if i == 0 and SUCCESS_DELIMITER not in param:
+                # TODO log failure here
+                self.http_status = param.decode("utf-8")
+                self.status(False)
+                self.log()
+                self.client.close()
+                quit()
+            elif i == 0:
+                self.http_status = param.decode("utf-8")
+                self.status(True)
+            if (CONTENT_LENGTH in param):
+                self.content_length = int(param[len(CONTENT_LENGTH):])
+            if (CHUNK_DELIMITER in param):
+                # TODO log failure here
+                self.log()
+                self.client.close()
+                quit(ERR4)
+            i+=1
+    
+    def content(self):
+        try: 
+            self.body = self.client.recv(self.content_length)
+        except Exception as e:
+            self.client.close()
+            sys.exit(err2(e))
+        return self.body.decode("utf-8")
+
+    def log(self):
+        print("hello")
+    
+    def status(self, is_success):
+        if (is_success):
+            print(bcolors.OKGREEN + "Success " + self.url + " " + self.http_status + bcolors.ENDC)
+        else:
+            print(bcolors.FAIL + "Unsuccessful " + self.url + " " + self.http_status + bcolors.ENDC)
+
+    def close(self):
+        self.client.close()
+
 def main():
+    # Parse arguments
     parser = argparse.ArgumentParser(
         prog='sicarbonMyCurl', 
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -252,19 +236,31 @@ def main():
     if (len(sys.argv) < 2):
         parser.print_help()
         quit()
+
+    # Parse user input
     args = parser.parse_args()
     urlObject = parseUrl(args, parser)
     ip = ""
+    query = "/"
+    port = "80"
     if (urlObject["ip"] != None):
         ip = urlObject["ip"]
-    query = "/"
     if (urlObject["query"] != ""):
         query = urlObject["query"]
-    socket = Socket(urlObject["hostname"], ip, urlObject["port"], query, urlObject["url"])
-    socket.sendRequest()
-    content = socket.content()
-    print(content)
-    socket.close()
+    if (urlObject["port"] != None):
+        port = urlObject["port"]
+
+    # Create HTTP object
+    http = Http(urlObject["hostname"], ip, port, query, urlObject["url"])
+    http.send_request()
+    content = http.content()
+    f = open("HTTPoutput.html", "w")
+    f.write(content)
+    f.close()
+
+    # On success, log and close
+    http.log()
+    http.close()
 
 if __name__ == "__main__":
     main()
