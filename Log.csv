@@ -36,3 +36,7 @@ Success, 200, http://149.248.9.165, www.isebas.us, 192.168.0.104, 149.248.9.165,
 
 Success, 200, http://149.248.9.165, www.isebas.us, 192.168.0.104, 149.248.9.165, 56281, 80, HTTP/1.1 200 OK
 
+Success, 200, http://149.248.9.165, www.isebas.us, 192.168.0.104, 149.248.9.165, 56344, 80, HTTP/1.1 200 OK
+
+Success, 200, http://www.example.com, www.example.com, 192.168.0.104, 93.184.216.34, 56373, 80, HTTP/1.1 200 OK
+

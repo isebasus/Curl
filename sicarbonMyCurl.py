@@ -1,12 +1,15 @@
+# Sebastian Carbonero
+# sicarbon
+# Final Project
+# © 2022
+
 import argparse
-from doctest import REPORT_CDIFF
 import textwrap
 import socket
 import sys
 import re
-from urllib.request import urlopen
 
-# Definitions -----------------------------------------------------------------------
+"""Definitions"""
 HTTP_DELIMITER = b'\r\n\r'
 CONTENT_LENGTH = b'Content-Length:'
 SUCCESS_DELIMITER = b'HTTP/1.1 200 OK'
@@ -14,32 +17,37 @@ CHUNK_DELIMITER = b'Transfer-Encoding: chunked'
 BUFFER_LENGTH = 1
 TIMEOUT = 10
 
-# REGEX PATTERNS --------------------------------------------------------------------
+"""Regex Patterns"""
 HOSTNAME_PATTERN = "([a-z]+\.[a-zA-Z0-9]+\.[a-z]+)"
 DOMAIN_PATTERN = "([a-zA-Z0-9]+\.[a-z]+)"
 IP_PATTERN = "([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})"
 
-# Command Line colors ---------------------------------------------------------------
-# 
-# Resource:
-# https://stackoverflow.com/questions/287871/how-to-print-colored-text-to-the-terminal
-#
+"""Command Line Colors"""
 class bcolors:
     OKGREEN = '\033[92m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
 
-# ERROR MESSAGES --------------------------------------------------------------------
+"""Error Messages"""
 ERR1 = bcolors.FAIL + "ERROR: Invalid hostname or ip was given." + bcolors.ENDC
 ERR4 = bcolors.FAIL + "ERROR: Chunk encoding is not supported" + bcolors.ENDC
-
 def err2(e): 
     return bcolors.FAIL + "ERROR: " + str(e) + bcolors.ENDC
-
 def err3(addr, e):
     return bcolors.FAIL + "ERROR: something's wrong with " + str(addr) + " Exception is " + str(e) + bcolors.ENDC
 
-
+"""
+# parseUrl
+# 
+# This function is used to parse the
+# User input.
+# 
+# Functions:
+# - Checks if http is within substring
+# - Checks if there is a hostname or ip
+# - Checks for a port specified by the
+#   user 
+"""
 def parseUrl(args, parser):
     url = args.url
     urlObject = {
@@ -50,6 +58,7 @@ def parseUrl(args, parser):
         'url': url,
         'listHeader': args.l
     }
+
     # Check if user input for http is correct
     http = url[0:4]
     if (http != "http"):
@@ -112,7 +121,19 @@ def parseUrl(args, parser):
             urlObject["query"] = query
     return urlObject
 
-
+"""
+# Http
+# 
+# This class is used to create sockets
+# and connect to other hosts to perform 
+# HTTP requests.
+# 
+# Functions:
+# - Connects to client
+# - Sends a request
+# - Parses Header for data
+# - Fetches HTTP GET request body
+"""
 class Http:
     """Socket class to perform HTTP requests to hosts"""
 
@@ -132,6 +153,8 @@ class Http:
         self.connect()
 
     def connect(self):
+        """Creates a new socket connection to a host either using
+        IP or hostname"""
         try:
             ip = socket.gethostbyname(self.hostname)
             if (self.ip != "" and self.ip != ip):
@@ -151,6 +174,8 @@ class Http:
             sys.exit(err3(self.addr, e))
 
     def send_request(self):
+        """Used to send a HTTP request to the host, if there was an 
+        error in the HTTP request, we would log that error."""
         try:
             get = "GET " + self.query + " HTTP/1.1\r\nHost: "+ self.hostname +"\r\n\r\n"
             b = get.encode('utf-8')
@@ -161,6 +186,9 @@ class Http:
         self.get_header()
 
     def get_header(self):
+        """Used to fetch the header from the server. The client will
+        get bytes one by one until we find the HTTP_DELIMITER. Once
+        we find that, we have fetched the HTTP request header."""
         try: 
             while True:
                 chunk = self.client.recv(BUFFER_LENGTH)
@@ -173,6 +201,8 @@ class Http:
         self.read_header()
 
     def read_header(self):
+        """Used to parse the header and check if there were any errors
+        and also obtains the content length of the request body."""
         i = 0
         for param in self.header.split(b'\r\n'):
             if i == 0 and SUCCESS_DELIMITER not in param:
@@ -193,6 +223,8 @@ class Http:
             i+=1
     
     def content(self):
+        """This function is used to receive the content in chunks
+        and write the HTML output to HTTPoutput.html"""
         try: 
             index = 0
             f = open("HTTPoutput.html", "w")
@@ -208,6 +240,7 @@ class Http:
             sys.exit(err2(e))
 
     def log(self, status):
+        """Used to log information about the HTTP request."""
         f = open("Log.csv", "a")
         src_ip, src_port = self.client.getsockname()
         status_code = [int(word) for word in self.http_status.split() if word.isdigit()][0]
@@ -220,14 +253,24 @@ class Http:
         f.close()
 
     def status(self, is_success):
+        """Used to print the status of the HTTP request to terminal."""
         if (is_success):
             print(bcolors.OKGREEN + "Success " + self.url + " " + self.http_status + bcolors.ENDC)
         else:
             print(bcolors.FAIL + "Unsuccessful " + self.url + " " + self.http_status + bcolors.ENDC)
 
     def close(self):
+        """Used to close the socket."""
         self.client.close()
 
+"""
+# main
+# 
+# Initially parses the user input with
+# argparse and creates the object Http
+# to handle requests. 
+# HTTP requests.
+"""
 def main():
     # Parse arguments
     parser = argparse.ArgumentParser(
