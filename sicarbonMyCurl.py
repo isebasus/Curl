@@ -93,7 +93,7 @@ def parseUrl(args, parser):
         query = url.replace("http://" + ip[0], "", 1)
     else:
         name = ""
-        if (len(hostname) == 0):
+        if (hostname == None or len(hostname) == 0):
             name = domain[0]
         else:
             name = hostname[0]
@@ -217,6 +217,7 @@ class Http:
             if (CONTENT_LENGTH in param):
                 self.content_length = int(param[len(CONTENT_LENGTH):])
             if (CHUNK_DELIMITER in param):
+                self.http_status = "HTTP/1.1 400 Bad Request"
                 self.log("Unsuccessful")
                 self.client.close()
                 quit(ERR4)
