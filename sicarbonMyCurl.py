@@ -148,6 +148,7 @@ class Http:
         self.http_status = ""
         self.useIp = False
         self.header = bytes()
+        self.code = int()
         self.addr = (hostname, int(port))
         self.client.settimeout(TIMEOUT)
         self.connect()
@@ -190,12 +191,19 @@ class Http:
         get bytes one by one until we find the HTTP_DELIMITER. Once
         we find that, we have fetched the HTTP request header."""
         try: 
+            i = 0
             while True:
                 chunk = self.client.recv(BUFFER_LENGTH)
+                if (i == 0 and chunk == b''):
+                    raise Exception("[Errno 54] Connection reset by peer")
                 if (chunk == None or HTTP_DELIMITER in self.header):
                     break
                 self.header += chunk
+                i+=1
         except Exception as e:
+            self.http_status = str(e);
+            self.code = int(re.search(r'\d+', self.http_status).group())
+            self.log("Unsuccessful")
             self.client.close()
             sys.exit(err2(e))
         self.read_header()
@@ -207,17 +215,20 @@ class Http:
         for param in self.header.split(b'\r\n'):
             if i == 0 and SUCCESS_DELIMITER not in param:
                 self.http_status = param.decode("utf-8")
+                self.code = [int(word) for word in self.http_status.split() if word.isdigit()][0]
                 self.status(False)
                 self.log("Unsuccessful")
                 self.client.close()
                 quit()
             elif i == 0:
                 self.http_status = param.decode("utf-8")
+                self.code = [int(word) for word in self.http_status.split() if word.isdigit()][0]
                 self.status(True)
             if (CONTENT_LENGTH in param):
                 self.content_length = int(param[len(CONTENT_LENGTH):])
             if (CHUNK_DELIMITER in param):
                 self.http_status = "HTTP/1.1 400 Bad Request"
+                self.code = [int(word) for word in self.http_status.split() if word.isdigit()][0]
                 self.log("Unsuccessful")
                 self.client.close()
                 quit(ERR4)
@@ -244,9 +255,8 @@ class Http:
         """Used to log information about the HTTP request."""
         f = open("Log.csv", "a")
         src_ip, src_port = self.client.getsockname()
-        status_code = [int(word) for word in self.http_status.split() if word.isdigit()][0]
         info = (
-            status + ", " + str(status_code) + ", " + self.url + ", " + self.hostname + ", " + 
+            status + ", " + str(self.code) + ", " + self.url + ", " + self.hostname + ", " + 
             src_ip + ", " + self.ip + ", " + str(src_port) + ", " + str(self.port) + ", " + 
             self.http_status
         )

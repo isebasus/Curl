@@ -1,40 +1,18 @@
-Unsuccessful, 404, http://www.example.com/anyname.html, www.example.com, 192.168.0.104, 93.184.216.34, 61007, 80, HTTP/1.1 404 Not Found
+Unsuccessful, 404, http://www.example.com/anyname.html, www.example.com, 149.248.9.165, 93.184.216.34, 57910, 80, HTTP/1.1 404 Not Found
 
-Unsuccessful, 404, http://www.google.com/somedoc1.html:80, www.google.com, 192.168.0.104, 216.58.194.164, 61008, 80, HTTP/1.1 404 Not Found
+Unsuccessful, 404, http://www.google.com/somedoc1.html:80, www.google.com, 149.248.9.165, 142.250.189.4, 57970, 80, HTTP/1.1 404 Not Found
 
-Unsuccessful, 403, http://wwwexample.com/index.html, wwwexample.com, 192.168.0.104, 104.247.82.13, 61009, 80, HTTP/1.1 403 Forbidden
+Unsuccessful, 54, http://www.google.com:443, www.google.com, 149.248.9.165, 142.250.189.4, 57664, 443, [Errno 54] Connection reset by peer
 
-Unsuccessful, 400, http://www.google.com/index.html, www.google.com, 192.168.0.104, 216.58.194.164, 61010, 80, HTTP/1.1 400 Bad Request
+Unsuccessful, 403, http://wwwexample.com/index.html, wwwexample.com, 149.248.9.165, 104.247.82.13, 47132, 80, HTTP/1.1 403 Forbidden
 
-Success, 200, http://neverssl.com/, neverssl.com, 192.168.0.104, 13.226.210.10, 61011, 80, HTTP/1.1 200 OK
+Unsuccessful, 400, http://www.google.com/index.html, www.google.com, 149.248.9.165, 142.250.189.4, 57976, 80, HTTP/1.1 400 Bad Request
 
-Success, 200, http://pudim.com.br/, pudim.com.br, 192.168.0.104, 54.207.20.104, 61012, 80, HTTP/1.1 200 OK
+Success, 200, http://neverssl.com/, neverssl.com, 149.248.9.165, 13.226.200.117, 54274, 80, HTTP/1.1 200 OK
 
-Success, 200, http://www.softwareqatest.com/, www.softwareqatest.com, 192.168.0.104, 216.92.49.183, 61013, 80, HTTP/1.1 200 OK
+Success, 200, http://pudim.com.br/, pudim.com.br, 149.248.9.165, 54.207.20.104, 39656, 80, HTTP/1.1 200 OK
 
-Success, 200, http://www.testingmcafeesites.com/, www.testingmcafeesites.com, 192.168.0.104, 161.69.29.75, 61014, 80, HTTP/1.1 200 OK
+Success, 200, http://www.softwareqatest.com/, www.softwareqatest.com, 149.248.9.165, 216.92.49.183, 38740, 80, HTTP/1.1 200 OK
 
-Unsuccessful, 400, http://www.google.com/index.html, www.google.com, 172.20.10.2, 172.217.5.100, 51956, 80, HTTP/1.1 400 Bad Request
-
-Success, 200, http://neverssl.com/, neverssl.com, 172.20.10.2, 13.227.65.101, 51970, 80, HTTP/1.1 200 OK
-
-Success, 200, http://neverssl.com/, neverssl.com, 169.233.142.76, 13.35.121.94, 52966, 80, HTTP/1.1 200 OK
-
-Unsuccessful, 400, http://www.google.com/index.html, www.google.com, 169.233.142.76, 142.251.40.36, 52969, 80, HTTP/1.1 400 Bad Request
-
-Unsuccessful, 404, http://www.example.com/anyname.html, www.example.com, 169.233.142.76, 93.184.216.34, 52975, 80, HTTP/1.1 404 Not Found
-
-Unsuccessful, 404, http://www.google.com/somedoc1.html:80, www.google.com, 192.168.1.11, 172.217.5.100, 54540, 80, HTTP/1.1 404 Not Found
-
-Success, 200, http://www.neverssl.com, www.neverssl.com, 192.168.1.11, 13.226.210.90, 54554, 80, HTTP/1.1 200 OK
-
-Unsuccessful, 301, http://docs.python.org/3/library/argparse.html, docs.python.org, 192.168.1.11, 151.101.188.223, 54613, 80, HTTP/1.1 301 Moved Permanently
-
-Unsuccessful, 404, http://93.184.216.34:80/foo.html, www.example.com, 192.168.1.11, 93.184.216.34, 54675, 80, HTTP/1.1 404 Not Found
-
-Unsuccessful, 404, http://www.example.com/anyname.html, www.example.com, 192.168.1.11, 93.184.216.34, 49978, 80, HTTP/1.1 404 Not Found
-
-Success, 200, http://www.neverssl.com/, www.neverssl.com, 192.168.1.11, 13.226.210.59, 57902, 80, HTTP/1.1 200 OK
-
-Unsuccessful, 400, http://www.google.com, www.google.com, 192.168.1.11, 142.250.189.196, 63996, 80, HTTP/1.1 400 Bad Request
+Success, 200, http://www.testingmcafeesites.com/, www.testingmcafeesites.com, 149.248.9.165, 161.69.49.22, 58312, 80, HTTP/1.1 200 OK
 
