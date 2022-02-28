@@ -18,8 +18,7 @@ BUFFER_LENGTH = 1
 TIMEOUT = 10
 
 """Regex Patterns"""
-HOSTNAME_PATTERN = "([a-z]+\.[a-zA-Z0-9]+\.[a-z]+)"
-DOMAIN_PATTERN = "([a-zA-Z0-9]+\.[a-z]+)"
+HOSTNAME_PATTERN = "([a-z]+(\.[a-zA-z0-9]+){1,5})"
 IP_PATTERN = "([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})"
 
 """Command Line Colors"""
@@ -71,17 +70,14 @@ def parseUrl(args, parser):
     
     # Check for hostname or IP
     hostname = re.findall(HOSTNAME_PATTERN, url)
-    domain = re.findall(DOMAIN_PATTERN, url)
     ip = re.findall(IP_PATTERN, url)
     hostOrDomain = url[7:]
     query = ""
 
-    if (not len(domain) == 0 and not hostOrDomain.startswith(domain[0])) or len(domain) == 0:
-        domain = None
     if (not len(hostname) == 0 and not hostOrDomain.startswith(hostname[0])) or len(hostname) == 0:
         hostname = None
 
-    if (hostname == None and domain == None):
+    if (hostname == None):
         if (len(ip) == 0):
             parser.print_help()
             sys.exit(bcolors.FAIL + "Exception: No host name or IP was specified." + bcolors.ENDC)
@@ -92,11 +88,7 @@ def parseUrl(args, parser):
         urlObject["ip"] = ip[0]
         query = url.replace("http://" + ip[0], "", 1)
     else:
-        name = ""
-        if (hostname == None or len(hostname) == 0):
-            name = domain[0]
-        else:
-            name = hostname[0]
+        name, x = hostname[0]
         urlObject["hostname"] = name
         query = url.replace("http://" + name, "", 1)
     
@@ -227,7 +219,6 @@ class Http:
             if (CONTENT_LENGTH in param):
                 self.content_length = int(param[len(CONTENT_LENGTH):])
             if (CHUNK_DELIMITER in param):
-                self.http_status = "HTTP/1.1 400 Bad Request"
                 self.code = [int(word) for word in self.http_status.split() if word.isdigit()][0]
                 self.log("Unsuccessful")
                 self.client.close()

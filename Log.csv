@@ -1,18 +1,20 @@
-Unsuccessful, 404, http://www.example.com/anyname.html, www.example.com, 149.248.9.165, 93.184.216.34, 57910, 80, HTTP/1.1 404 Not Found
+Unsuccessful, 404, http://www.example.com/anyname.html, www.example.com, 192.168.1.11, 93.184.216.34, 57207, 80, HTTP/1.1 404 Not Found
 
-Unsuccessful, 404, http://www.google.com/somedoc1.html:80, www.google.com, 149.248.9.165, 142.250.189.4, 57970, 80, HTTP/1.1 404 Not Found
+Unsuccessful, 404, http://www.google.com/somedoc1.html:80, www.google.com, 192.168.1.11, 142.250.188.4, 57208, 80, HTTP/1.1 404 Not Found
 
-Unsuccessful, 54, http://www.google.com:443, www.google.com, 149.248.9.165, 142.250.189.4, 57664, 443, [Errno 54] Connection reset by peer
+Unsuccessful, 54, http://www.google.com:443, www.google.com, 192.168.1.11, 142.250.188.4, 57209, 443, [Errno 54] Connection reset by peer
 
-Unsuccessful, 403, http://wwwexample.com/index.html, wwwexample.com, 149.248.9.165, 104.247.82.13, 47132, 80, HTTP/1.1 403 Forbidden
+Unsuccessful, 403, http://wwwexample.com/index.html, wwwexample.com, 192.168.1.11, 104.247.82.13, 57210, 80, HTTP/1.1 403 Forbidden
 
-Unsuccessful, 400, http://www.google.com/index.html, www.google.com, 149.248.9.165, 142.250.189.4, 57976, 80, HTTP/1.1 400 Bad Request
+Unsuccessful, 200, http://www.google.com/index.html, www.google.com, 192.168.1.11, 142.250.188.4, 57211, 80, HTTP/1.1 200 OK
 
-Success, 200, http://neverssl.com/, neverssl.com, 149.248.9.165, 13.226.200.117, 54274, 80, HTTP/1.1 200 OK
+Success, 200, http://neverssl.com/, neverssl.com, 192.168.1.11, 13.226.210.90, 57212, 80, HTTP/1.1 200 OK
 
-Success, 200, http://pudim.com.br/, pudim.com.br, 149.248.9.165, 54.207.20.104, 39656, 80, HTTP/1.1 200 OK
+Success, 200, http://pudim.com.br/, pudim.com.br, 192.168.1.11, 54.207.20.104, 57213, 80, HTTP/1.1 200 OK
 
-Success, 200, http://www.softwareqatest.com/, www.softwareqatest.com, 149.248.9.165, 216.92.49.183, 38740, 80, HTTP/1.1 200 OK
+Success, 200, http://www.softwareqatest.com/, www.softwareqatest.com, 192.168.1.11, 216.92.49.183, 57214, 80, HTTP/1.1 200 OK
 
-Success, 200, http://www.testingmcafeesites.com/, www.testingmcafeesites.com, 149.248.9.165, 161.69.49.22, 58312, 80, HTTP/1.1 200 OK
+Success, 200, http://www.testingmcafeesites.com/, www.testingmcafeesites.com, 192.168.1.11, 161.69.29.75, 57215, 80, HTTP/1.1 200 OK
+
+Unsuccessful, 54, http://www.soe.ucsc.edu:443, www.soe.ucsc.edu, 192.168.1.11, 128.114.47.158, 57217, 443, [Errno 54] Connection reset by peer
 
