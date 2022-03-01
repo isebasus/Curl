@@ -229,7 +229,7 @@ class Http:
         and write the HTML output to HTTPoutput.html"""
         try: 
             index = 0
-            f = open("HTTPoutput.html", "w")
+            f = open("out/HTTPoutput.html", "w")
             while True:
                 if (index == self.content_length):
                     break
@@ -243,7 +243,7 @@ class Http:
 
     def log(self, status):
         """Used to log information about the HTTP request."""
-        f = open("Log.csv", "a")
+        f = open("out/Log.csv", "a")
         src_ip, src_port = self.client.getsockname()
         info = (
             status + ", " + str(self.code) + ", " + self.url + ", " + self.hostname + ", " + 
