@@ -5,7 +5,6 @@
 
 ## What you need
 You will need [python3](https://www.python.org/downloads/) installed and the `socket` python library installed as dependecies.
-___
 
 ## Building this project
 Once all dependecies are installed, you will also need the files:
@@ -54,7 +53,6 @@ ___
 - HTTPS 
 - Chunk Encoding
 - Redirection
-___
 
 ## 📋 Log.csv
 
