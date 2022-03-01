@@ -47,8 +47,6 @@ optional arguments:
  -l List Header Information.
 ```
 
-___ 
-
 ## ❗ Unsupported
 - HTTPS 
 - Chunk Encoding
@@ -68,5 +66,3 @@ Success, 200, http://pudim.com.br/, pudim.com.br, 192.168.1.11, 54.207.20.104, 5
 
 Unsuccessful, 404, http://www.example.com/anyname.html, www.example.com, 192.168.1.11, 93.184.216.34, 51143, 80, HTTP/1.1 404 Not Found
 ```
-
-___
