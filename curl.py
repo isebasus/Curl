@@ -234,7 +234,7 @@ class Http:
                 if (index == self.content_length):
                     break
                 tmp = self.client.recv(1024)
-                f.write(tmp.decode("utf-8"))
+                f.write(tmp.decode("ISO-8859-1"))
                 index += len(tmp)
             f.close()
         except Exception as e:
