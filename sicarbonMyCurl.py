@@ -55,7 +55,6 @@ def parseUrl(args, parser):
         'port': None,
         'query': None,
         'url': url,
-        'listHeader': args.l
     }
 
     # Check if user input for http is correct
@@ -287,7 +286,6 @@ def main():
             '''))
     parser.add_argument("url", help='http://hostname[ip]:[port]/[args]')
     parser.add_argument("hostname", nargs='?', help="Optional hostname argument")
-    parser.add_argument('-l', default=False, action='store_true', help="List Header Information.")
     if (len(sys.argv) < 2):
         parser.print_help()
         quit()

@@ -17,4 +17,3 @@ Success, 200, http://www.softwareqatest.com/, www.softwareqatest.com, 192.168.1.
 Success, 200, http://www.testingmcafeesites.com/, www.testingmcafeesites.com, 192.168.1.11, 161.69.29.75, 57215, 80, HTTP/1.1 200 OK
 
 Unsuccessful, 54, http://www.soe.ucsc.edu:443, www.soe.ucsc.edu, 192.168.1.11, 128.114.47.158, 57217, 443, [Errno 54] Connection reset by peer
-
